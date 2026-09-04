@@ -1,0 +1,31 @@
+# === Interface Gráfica ===
+PyQt6>=6.6.0
+
+# === Banco de Dados ===
+mysql-connector-python>=8.3.0
+
+# === Segurança ===
+bcrypt>=4.1.0
+
+# === API Fiscal (Focus NFe) ===
+requests>=2.31.0
+
+# === Importação de NF-e (XML) ===
+xmltodict>=0.13.0
+
+# === Código de Barras ===
+python-barcode>=0.15.1
+Pillow>=10.2.0
+
+# === Impressão Térmica (ESC/POS — opcional) ===
+python-escpos>=2.2.0
+
+# === Relatórios e Exportação ===
+openpyxl>=3.1.0
+
+# === Testes ===
+pytest>=8.0.0
+pytest-cov>=4.1.0
+
+# === Build ===
+pyinstaller>=6.3.0
