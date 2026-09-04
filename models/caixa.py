@@ -56,19 +56,25 @@ class CaixaModel(BaseModel):
         if not turno or turno["status"] != "aberto":
             raise ValueError("Turno não encontrado ou já fechado.")
 
-        # Calcular diferença
+        # Calcular diferença - converter tudo para Decimal
+        valor_abertura = Decimal(str(turno["valor_abertura"] or 0))
+        total_vendas = Decimal(str(turno["total_vendas"] or 0))
+        total_cancelamentos = Decimal(str(turno["total_cancelamentos"] or 0))
+        total_sangrias = Decimal(str(turno["total_sangrias"] or 0))
+        total_suprimentos = Decimal(str(turno["total_suprimentos"] or 0))
+        
         valor_esperado = (
-            turno["valor_abertura"]
-            + turno["total_vendas"]
-            - turno["total_cancelamentos"]
-            - turno["total_sangrias"]
-            + turno["total_suprimentos"]
+            valor_abertura
+            + total_vendas
+            - total_cancelamentos
+            - total_sangrias
+            + total_suprimentos
         )
-        diferenca = valor_fechamento - float(valor_esperado)
+        diferenca = Decimal(str(valor_fechamento)) - valor_esperado
 
         self.update(turno_id, {
-            "valor_fechamento": valor_fechamento,
-            "diferenca": diferenca,
+            "valor_fechamento": float(valor_fechamento),
+            "diferenca": float(diferenca),
             "fechamento": datetime.now(),
             "status": "fechado",
             "observacao": observacao,
@@ -76,15 +82,15 @@ class CaixaModel(BaseModel):
 
         return {
             "turno_id": turno_id,
-            "valor_abertura": turno["valor_abertura"],
-            "total_vendas": turno["total_vendas"],
-            "total_cancelamentos": turno["total_cancelamentos"],
-            "total_sangrias": turno["total_sangrias"],
-            "total_suprimentos": turno["total_suprimentos"],
+            "valor_abertura": float(valor_abertura),
+            "total_vendas": float(total_vendas),
+            "total_cancelamentos": float(total_cancelamentos),
+            "total_sangrias": float(total_sangrias),
+            "total_suprimentos": float(total_suprimentos),
             "qtd_vendas": turno["qtd_vendas"],
             "valor_esperado": float(valor_esperado),
-            "valor_fechamento": valor_fechamento,
-            "diferenca": diferenca,
+            "valor_fechamento": float(valor_fechamento),
+            "diferenca": float(diferenca),
         }
 
     def get_open_shift(self, usuario_id: int) -> Optional[Dict]:
@@ -153,7 +159,7 @@ class CaixaModel(BaseModel):
             """,
             (turno_id,)
         )
-        if result and result[0]['total']:
+        if result and result[0]['total'] is not None:
             return Decimal(str(result[0]['total']))
         return Decimal('0')
 
@@ -168,6 +174,6 @@ class CaixaModel(BaseModel):
             """,
             (turno_id,)
         )
-        if result and result[0]['total']:
+        if result and result[0]['total'] is not None:
             return Decimal(str(result[0]['total']))
         return Decimal('0')

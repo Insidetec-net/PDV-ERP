@@ -5,6 +5,7 @@ Camada entre Models e UI, contendo validações e regras de negócio.
 
 import logging
 from typing import Optional, Dict, List
+from decimal import Decimal
 
 from models.caixa import CaixaModel
 from database.connection import execute_query
@@ -134,7 +135,7 @@ class CaixaService:
         )
         return mov_id
 
-    def get_saldo_turno(self, turno_id: int) -> float:
+    def get_saldo_turno(self, turno_id: int) -> Decimal:
         """
         Calcula o saldo atual do turno.
 
@@ -150,20 +151,14 @@ class CaixaService:
         if not turno:
             raise ValueError(f"Turno #{turno_id} não encontrado.")
 
-        valor_abertura = float(turno["valor_abertura"] or 0)
-        total_sangrias = float(turno["total_sangrias"] or 0)
-        total_suprimentos = float(turno["total_suprimentos"] or 0)
+        valor_abertura = Decimal(str(turno["valor_abertura"] or 0))
+        total_sangrias = Decimal(str(turno["total_sangrias"] or 0))
+        total_suprimentos = Decimal(str(turno["total_suprimentos"] or 0))
 
         # Obtém vendas em dinheiro diretamente do banco
         vendas_dinheiro = self.model.get_total_vendas_dinheiro(turno_id)
 
         saldo = valor_abertura + vendas_dinheiro - total_sangrias + total_suprimentos
-        logger.debug(
-            f"Saldo turno #{turno_id}: abertura={valor_abertura:.2f}, "
-            f"vendas_dinheiro={vendas_dinheiro:.2f}, "
-            f"sangrias={total_sangrias:.2f}, suprimentos={total_suprimentos:.2f}, "
-            f"saldo={saldo:.2f}"
-        )
         return saldo
 
     def get_movimentacoes(self, turno_id: int) -> list:

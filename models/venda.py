@@ -39,14 +39,14 @@ class VendaModel(BaseModel):
         Returns:
             ID da venda criada.
         """
-        # Calcular totais
+        # Calcular totais - converter para Decimal para evitar erros
         subtotal = sum(
-            item["quantidade"] * item["preco_unitario"] - item.get("desconto_item", 0)
+            Decimal(str(item["quantidade"])) * Decimal(str(item["preco_unitario"])) - Decimal(str(item.get("desconto_item", 0)))
             for item in items
         )
-        total = subtotal - desconto
-        valor_recebido = sum(p["valor"] for p in payments)
-        troco = max(0, valor_recebido - total)
+        total = subtotal - Decimal(str(desconto))
+        valor_recebido = sum(Decimal(str(p["valor"])) for p in payments)
+        troco = max(Decimal('0'), valor_recebido - total)
 
         with db_transaction() as (conn, cursor):
             # 1. Inserir venda
@@ -57,16 +57,16 @@ class VendaModel(BaseModel):
                  valor_recebido, troco, status)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'finalizada')
                 """,
-                (turno_id, cliente_id, usuario_id, subtotal, desconto,
-                 total, valor_recebido, troco),
+                (turno_id, cliente_id, usuario_id, float(subtotal), float(desconto),
+                 float(total), float(valor_recebido), float(troco)),
             )
             venda_id = cursor.lastrowid
 
             # 2. Inserir itens
             for item in items:
                 item_subtotal = (
-                    item["quantidade"] * item["preco_unitario"]
-                    - item.get("desconto_item", 0)
+                    Decimal(str(item["quantidade"])) * Decimal(str(item["preco_unitario"]))
+                    - Decimal(str(item.get("desconto_item", 0)))
                 )
                 cursor.execute(
                     """
@@ -77,7 +77,7 @@ class VendaModel(BaseModel):
                     """,
                     (venda_id, item["produto_id"], item["quantidade"],
                      item["preco_unitario"], item.get("desconto_item", 0),
-                     item_subtotal),
+                     float(item_subtotal)),
                 )
 
                 # 3. Baixar estoque
