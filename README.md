@@ -4,6 +4,8 @@ Sistema de gestão completo para bazar físico — **PDV (Frente de Caixa)** + *
 
 > Sistema white-label: todas as informações da empresa são configuráveis.
 
+**Repositório:** [https://github.com/Insidetec-net/PDV-ERP](https://github.com/Insidetec-net/PDV-ERP)
+
 ---
 
 ## 🛠️ Stack Tecnológica
